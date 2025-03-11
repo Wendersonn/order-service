@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.Acknowledgment;
@@ -13,7 +14,7 @@ import sboot.service.order.config.exceptions.OrderException;
 import sboot.service.order.dto.OrderDTO;
 import sboot.service.order.dto.ProductDTO;
 import sboot.service.order.entities.Order;
-import sboot.service.order.entities.Product;
+import sboot.service.order.entities.Produtos;
 import sboot.service.order.repository.OrderRepository;
 
 import java.util.Optional;
@@ -23,8 +24,8 @@ import java.util.stream.Collectors;
 public class OrderConsumer {
     private static final Logger logger = LoggerFactory.getLogger(OrderConsumer.class);
 
-
-    private static final String PROCESSED_ORDER_TOPIC = "processed-orders-topic";
+    @Value("${app.kafka.producer.topics:default-topic}")
+    private String topic;
 
     @Autowired
     private OrderRepository orderRepository;
@@ -33,21 +34,21 @@ public class OrderConsumer {
     private KafkaTemplate<String, OrderDTO> kafkaTemplate;
 
     @Transactional
-    @KafkaListener(topics = "order-topic", groupId = "order-group")
+    @KafkaListener(topics = "${app.kafka.consumer.topics}", groupId = "${app.kafka.consumer.group}")
     public void processOrder(@Payload OrderDTO orderDTO, Acknowledgment acknowledgment) {
         try {
             logger.info("Processando pedido recebido do Kafka: {}", orderDTO);
 
             Order order = new Order(orderDTO.getCodigo(), orderDTO.getProdutos().stream().map(p -> {
-                Product product = new Product();
-                product.setCodigo(p.getCodigo());
-                product.setNome(p.getNome());
-                product.setPrecoUnitario(p.getPrecoUnitario());
-                product.setQuantidade(p.getQuantidade());
-                return product;
+                Produtos produtos = new Produtos();
+                produtos.setCodigo(p.getCodigo());
+                produtos.setNome(p.getNome());
+                produtos.setPrecoUnitario(p.getPrecoUnitario());
+                produtos.setQuantidade(p.getQuantidade());
+                return produtos;
             }).collect(Collectors.toList()));
 
-            order.getProdutos().forEach(product -> product.setOrder(order));
+            order.getProdutos().forEach(produtos -> produtos.setOrder(order));
             Optional<Order> result =  orderRepository.findByCodigo(order.getCodigo());
             if (result.isPresent()){
                 logger.error("Pedido: {}, já existe na base", orderDTO.getCodigo());
@@ -64,8 +65,8 @@ public class OrderConsumer {
                     order.getValorTotalPedido()
             );
 
-            kafkaTemplate.send(PROCESSED_ORDER_TOPIC, dto);
-            logger.info("Pedido publicado no tópico {}", PROCESSED_ORDER_TOPIC);
+            kafkaTemplate.send(topic, dto);
+            logger.info("Pedido publicado no tópico {}", topic);
             acknowledgment.acknowledge();
 
         } catch (Exception e) {

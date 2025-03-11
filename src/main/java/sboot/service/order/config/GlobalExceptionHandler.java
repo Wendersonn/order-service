@@ -22,7 +22,7 @@ class GlobalExceptionHandler {
 
 
     @ExceptionHandler(OrderException.class)
-    public ResponseEntity<ErrorResponse> handleGenericException(OrderException ex) {
+    public ResponseEntity<ErrorResponse> handleOrderException(OrderException ex) {
         logger.error("Erro interno: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY.value(), "UNPROCESSABLE_ENTITY"));
     }

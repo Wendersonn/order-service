@@ -17,7 +17,7 @@ public class Order {
     private Long codigo;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Product> produtos;
+    private List<Produtos> produtos;
 
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
@@ -27,13 +27,13 @@ public class Order {
 
     public Order() {}
 
-    public Order(Long codigo, List<Product> produtos) {
+    public Order(Long codigo, List<Produtos> produtos) {
         this.codigo = codigo;
         this.produtos = produtos;
         this.valorTotalPedido = calculateTotalAmount(produtos);
     }
 
-    private BigDecimal calculateTotalAmount(List<Product> produtos) {
+    private BigDecimal calculateTotalAmount(List<Produtos> produtos) {
         return produtos.stream()
                 .map(p -> p.getPrecoUnitario().multiply(BigDecimal.valueOf(p.getQuantidade())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -55,11 +55,11 @@ public class Order {
         this.codigo = codigo;
     }
 
-    public List<Product> getProdutos() {
+    public List<Produtos> getProdutos() {
         return produtos;
     }
 
-    public void setProdutos(List<Product> produtos) {
+    public void setProdutos(List<Produtos> produtos) {
         this.produtos = produtos;
     }
 

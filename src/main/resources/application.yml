@@ -1,5 +1,7 @@
 # Configuração do servidor Kafka
 spring:
+  profiles:
+    active: local
   kafka:
     bootstrap-servers: localhost:9092
     producer:
@@ -27,9 +29,15 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
-
+app:
+  kafka:
+    consumer:
+      topics: ${APP_KAFKA_CONSUMER_TOPICS}
+      group: ${APP_KAFKA_CONSUMER_GROUP)
+    producer:
+      topics: ${APP_KAFKA_PRODUCER_TOPICS}
 # Configuração de Logs
 logging:
   level:
     org.springframework: INFO
-    com.example.order: DEBUG
+    sboot.service.order: DEBUG

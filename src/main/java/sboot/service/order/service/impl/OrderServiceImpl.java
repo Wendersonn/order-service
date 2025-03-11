@@ -1,21 +1,16 @@
 package sboot.service.order.service.impl;
 
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import sboot.service.order.dto.OrderDTO;
-import sboot.service.order.dto.OrderSummaryDTO;
 import sboot.service.order.dto.ProductDTO;
 import sboot.service.order.entities.Order;
-import sboot.service.order.entities.Product;
 import sboot.service.order.repository.OrderRepository;
 import sboot.service.order.repository.ProductRepository;
 import sboot.service.order.service.OrderService;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
